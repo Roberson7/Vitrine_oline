@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vitrine de Ofertas</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <div id="header-title">
+          <h1>Vitrine de Ofertas</h1>
+        </div>
+        <div style="display: flex">
+          <div class="admin-icon" onclick="openAdminModal()">🔑</div>
+          <div class="cart-icon" onclick="toggleCart()">
+            🛒 (<span id="cart-count">0</span>)
+          </div>
+          <!-- Botão discreto para ver o link de divulgação -->
+          <div
+            class="share-icon"
+            onclick="showPublicShareLinkModal()"
+            title="Ver meu link de divulgação"
+          >
+            🔗
+          </div>
+        </div>
+      </header>
+
+      <div class="carousel" id="carousel">
+        <div class="carousel-container" id="carousel-container"></div>
+        <button class="carousel-btn prev" onclick="prevSlide()">❮</button>
+        <button class="carousel-btn next" onclick="nextSlide()">❯</button>
+      </div>
+
+      <div class="nav-bar" id="nav-bar"></div>
+      <div class="marquee-container">
+        <marquee behavior="scroll" direction="left">
+          Adicione o produto no carrinho e fale com o vendedor ou Fale direto
+          com o vendedor clicando no ícone verde
+        </marquee>
+      </div>
+
+      <div class="products-grid" id="products"></div>
+
+      <div class="cart-modal" id="cart-modal">
+        <div class="cart-content">
+          <span class="close-cart" onclick="toggleCart()">×</span>
+          <h2>Carrinho de Compras</h2>
+          <div id="cart-items"></div>
+          <div class="cart-total" id="cart-total">Total: R$ 0,00</div>
+          <button class="checkout-btn" onclick="checkout()">
+            Fale com o Vendedor
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-modal" id="admin-modal">
+        <div class="admin-content">
+          <span class="close-admin" onclick="closeAdminModal()">×</span>
+          <h2>Modo Administrativo</h2>
+          <div id="admin-login" class="admin-login">
+            <input
+              type="email"
+              id="admin-email"
+              placeholder="Digite seu e-mail"
+              required
+            />
+            <input
+              type="password"
+              id="admin-password"
+              placeholder="Digite sua senha"
+              required
+            />
+            <button onclick="checkPassword()">Entrar</button>
+            <button onclick="showRegisterForm()">Cadastrar-se</button>
+          </div>
+          <div id="admin-panel" style="display: none">
+            <div style="text-align: right; margin-bottom: 10px">
+              <button class="share-link-btn" onclick="showShareLinkModal()">
+                🔗 Meu Link
+              </button>
+            </div>
+            <div class="admin-products" id="admin-products">
+              <h3>Seus Produtos Cadastrados</h3>
+            </div>
+            <form
+              id="admin-form"
+              class="admin-form"
+              onsubmit="addProduct(event)"
+            >
+              <input
+                type="text"
+                id="product-name"
+                placeholder="Nome do Produto"
+                required
+              />
+              <input
+                type="number"
+                id="product-price"
+                placeholder="Preço Original (ex: 99.90)"
+                step="0.01"
+                required
+              />
+              <input
+                type="number"
+                id="product-promo-price"
+                placeholder="Preço Promocional (ex: 79.90)"
+                step="0.01"
+              />
+              <label>Escolha o método para adicionar a imagem:</label>
+              <select id="image-method" onchange="toggleImageInput()">
+                <option value="url">Inserir URL</option>
+                <option value="file">Fazer Upload de Arquivo</option>
+              </select>
+              <input
+                type="url"
+                id="product-image-url"
+                placeholder="URL da Imagem"
+                style="display: block"
+              />
+              <input
+                type="file"
+                id="product-image-file"
+                accept="image/*"
+                style="display: none"
+              />
+              <input
+                type="text"
+                id="product-description"
+                placeholder="Descrição do Produto"
+                required
+              />
+              <select id="product-category" required>
+                <option value="">Selecione uma categoria</option>
+              </select>
+              <button type="submit">Cadastrar Produto</button>
+            </form>
+            <form
+              id="edit-form"
+              class="admin-form"
+              onsubmit="editProduct(event)"
+              style="display: none"
+            >
+              <input type="hidden" id="edit-product-id" />
+              <input
+                type="text"
+                id="edit-product-name"
+                placeholder="Nome do Produto"
+                required
+              />
+              <input
+                type="number"
+                id="edit-product-price"
+                placeholder="Preço Original (ex: 99.90)"
+                step="0.01"
+                required
+              />
+              <input
+                type="number"
+                id="edit-product-promo-price"
+                placeholder="Preço Promocional (ex: 79.90)"
+                step="0.01"
+              />
+              <label>Escolha o método para editar a imagem:</label>
+              <select id="edit-image-method" onchange="toggleEditImageInput()">
+                <option value="url">Inserir URL</option>
+                <option value="file">Fazer Upload de Arquivo</option>
+              </select>
+              <input
+                type="url"
+                id="edit-product-image-url"
+                placeholder="URL da Imagem"
+                style="display: block"
+              />
+              <input
+                type="file"
+                id="edit-product-image-file"
+                accept="image/*"
+                style="display: none"
+              />
+              <input
+                type="text"
+                id="edit-product-description"
+                placeholder="Descrição do Produto"
+                required
+              />
+              <select id="edit-product-category" required>
+                <option value="">Selecione uma categoria</option>
+              </select>
+              <button type="submit">Salvar Alterações</button>
+            </form>
+            <div class="carousel-items" id="carousel-items">
+              <h3>Imagens do Carrossel</h3>
+            </div>
+            <form
+              id="carousel-form"
+              class="admin-form"
+              onsubmit="addCarouselImage(event)"
+            >
+              <input
+                type="url"
+                id="carousel-image-url"
+                placeholder="URL da Imagem do Carrossel"
+                required
+              />
+              <button type="submit">Adicionar ao Carrossel</button>
+            </form>
+            <form
+              id="logo-form"
+              class="admin-form"
+              onsubmit="updateLogo(event)"
+            >
+              <input
+                type="url"
+                id="logo-url"
+                placeholder="URL do Logotipo"
+                required
+              />
+              <button type="submit">Atualizar Logotipo</button>
+            </form>
+            <div class="category-items" id="category-items">
+              <h3>Categorias Cadastradas</h3>
+            </div>
+            <form
+              id="category-form"
+              class="admin-form"
+              onsubmit="addCategory(event)"
+            >
+              <input
+                type="text"
+                id="category-name"
+                placeholder="Nome da Categoria"
+                required
+              />
+              <button type="submit">Adicionar Categoria</button>
+            </form>
+            <form
+              id="seller-phone-form"
+              class="admin-form"
+              onsubmit="updateSellerPhone(event)"
+            >
+              <input
+                type="text"
+                id="seller-phone"
+                placeholder="Seu Número do WhatsApp (ex: 5511987654321)"
+                required
+              />
+              <button type="submit">Salvar Meu Número</button>
+            </form>
+          </div>
+          <form
+            id="register-form"
+            class="admin-form"
+            onsubmit="registerSeller(event)"
+            style="display: none"
+          >
+            <input
+              type="email"
+              id="register-email"
+              placeholder="Digite seu e-mail"
+              required
+            />
+            <input
+              type="password"
+              id="register-password"
+              placeholder="Digite sua senha"
+              required
+            />
+            <input
+              type="text"
+              id="register-phone"
+              placeholder="Seu Número do WhatsApp (ex: 5511987654321)"
+              required
+            />
+            <button type="submit">Cadastrar</button>
+            <button type="button" onclick="showLoginForm()">
+              Voltar ao Login
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="description-modal" id="description-modal">
+        <div class="description-content">
+          <span class="close-description" onclick="closeDescriptionModal()"
+            >×</span
+          >
+          <div id="description-content"></div>
+        </div>
+      </div>
+
+      <div class="cart-success-modal" id="cart-success-modal">
+        <h3>Sucesso!</h3>
+        <p>Produto adicionado ao carrinho com sucesso!</p>
+        <button onclick="closeCartSuccessModal()">OK</button>
+      </div>
+
+      <div class="password-error-modal" id="password-error-modal">
+        <h3>Erro!</h3>
+        <p id="error-message">Senha ou e-mail incorretos! Tente novamente.</p>
+        <button onclick="closePasswordErrorModal()">OK</button>
+      </div>
+
+      <div class="share-link-modal" id="share-link-modal">
+        <div class="share-link-content">
+          <span class="close-share-link" onclick="closeShareLinkModal()"
+            >×</span
+          >
+          <h3>Seu Link de Compartilhamento</h3>
+          <p>Compartilhe este link com seus clientes!</p>
+          <div class="link-container">
+            <input type="text" id="share-link" readonly />
+            <button onclick="copyShareLink()">Copiar</button>
+          </div>
+          <p class="copy-success" id="copy-success">Copiado com sucesso!</p>
+        </div>
+      </div>
+
+      <!-- Nova modal para o link público -->
+      <div class="public-share-link-modal" id="public-share-link-modal">
+        <div class="public-share-link-content">
+          <span
+            class="close-public-share-link"
+            onclick="closePublicShareLinkModal()"
+            >×</span
+          >
+          <h3>Link de Divulgação</h3>
+          <p>
+            Esse é o link da sua vitrine para compartilhar com seus clientes!
+          </p>
+          <div class="link-container">
+            <input type="text" id="public-share-link" readonly />
+            <button onclick="copyPublicShareLink()">Copiar</button>
+          </div>
+          <p class="public-copy-success" id="public-copy-success">
+            Copiado com sucesso!
+          </p>
+        </div>
+      </div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
